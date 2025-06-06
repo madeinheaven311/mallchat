@@ -23,5 +23,38 @@
              <groupId>com.d4c.www</groupId>
              <artifactId>mallchat-common-starter</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.abin.mallchat</groupId>-->
+<!--            <artifactId>mallchat-transaction</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.abin.mallchat</groupId>-->
+<!--            <artifactId>mallchat-oss-starter</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.knuddels</groupId>
+            <artifactId>jtokkit</artifactId>
+            <version>0.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.3.19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+        </dependency>
+
     </dependencies>
 </project>
