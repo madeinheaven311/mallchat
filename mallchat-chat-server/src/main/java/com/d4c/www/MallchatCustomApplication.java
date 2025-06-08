@@ -12,6 +12,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @SpringBootApplication(scanBasePackages = {"com.d4c.www"})
 //@MapperScan({"com.d4c.www.**.mapper"})
 @ServletComponentScan
+@MapperScan({"com.d4c.www.**.mapper"})
 public class MallchatCustomApplication {
 
     public static void main(String[] args) {
