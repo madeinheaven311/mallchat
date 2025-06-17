@@ -1,4 +1,4 @@
-package com.abin.mallchat.common.user.domain.enums;
+package com.d4c.www.websocket.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

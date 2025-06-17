@@ -1,4 +1,4 @@
-package com.abin.mallchat.common.user.domain.dto;
+package com.d4c.www.websocket.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
