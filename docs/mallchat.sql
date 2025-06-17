@@ -1,6 +1,6 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-#TEST FOR FETCH kgkgkugk
+#TEST FOR FETCH qqqq
 -- ----------------------------
 -- Table structure for item_config
 -- ----------------------------
