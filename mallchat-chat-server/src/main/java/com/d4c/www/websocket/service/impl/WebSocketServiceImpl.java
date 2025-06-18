@@ -1,8 +1,10 @@
 package com.d4c.www.websocket.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONUtil;
 import com.d4c.www.common.constant.RedisKey;
 import com.d4c.www.common.util.RedisUtils;
+import com.d4c.www.user.domain.entity.User;
 import com.d4c.www.user.service.adapter.WSAdapter;
 import com.d4c.www.websocket.domain.dto.WSChannelExtraDTO;
 import com.d4c.www.websocket.domain.vo.resp.ws.WSBaseResp;
@@ -12,12 +14,14 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.SneakyThrows;
-import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -64,6 +68,20 @@ public class WebSocketServiceImpl implements WebSocketService {
         sendMsg(channel, WSAdapter.buildLoginResp(wxMpQrCodeTicket));
     }
 
+    @Override
+    public void removed(Channel channel) {
+        WSChannelExtraDTO wsChannelExtraDTO = ONLINE_WS_MAP.get(channel);
+        Optional<Long> uidOptional = Optional.ofNullable(wsChannelExtraDTO)
+                .map(WSChannelExtraDTO::getUid);
+        boolean offlineAll = offline(channel, uidOptional);
+        if (uidOptional.isPresent() && offlineAll) {//已登录用户断连,并且全下线成功
+            User user = new User();
+            user.setId(uidOptional.get());
+            user.setLastOptTime(LocalDateTime.now());
+            //applicationEventPublisher.publishEvent(new UserOfflineEvent(this, user));
+        }
+    }
+
     /**
      * 获取不重复的登录的code，微信要求最大不超过int的存储极限
      * 防止并发，可以给方法加上synchronize，也可以使用cas乐观锁
@@ -79,6 +97,22 @@ public class WebSocketServiceImpl implements WebSocketService {
         //储存一份在本地
         WAIT_LOGIN_MAP.put(inc, channel);
         return inc;
+    }
+
+    /**
+     * 用户下线
+     * return 是否全下线成功
+     */
+    private boolean offline(Channel channel, Optional<Long> uidOptional) {
+        ONLINE_WS_MAP.remove(channel);
+        if (uidOptional.isPresent()) {
+            CopyOnWriteArrayList<Channel> channels = ONLINE_UID_MAP.get(uidOptional.get());
+            if (CollectionUtil.isNotEmpty(channels)) {
+                channels.removeIf(ch -> Objects.equals(ch, channel));
+            }
+            return CollectionUtil.isEmpty(ONLINE_UID_MAP.get(uidOptional.get()));
+        }
+        return true;
     }
 
     /**
