@@ -1,6 +1,7 @@
 package com.d4c.www.user.service.handler;
 
 
+import com.d4c.www.user.service.WxMsgService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -15,16 +16,14 @@ import java.util.Map;
 public class ScanHandler extends AbstractHandler {
 
 
-//    @Autowired
-//    private WxMsgService wxMsgService;
+    @Autowired
+    private WxMsgService wxMsgService;
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMpXmlMessage, Map<String, Object> map,
                                     WxMpService wxMpService, WxSessionManager wxSessionManager) throws WxErrorException {
         // 扫码事件处理
-        //return wxMsgService.scan(wxMpService, wxMpXmlMessage);
-
-        return null;
+        return wxMsgService.scan(wxMpService, wxMpXmlMessage);
     }
 
 }

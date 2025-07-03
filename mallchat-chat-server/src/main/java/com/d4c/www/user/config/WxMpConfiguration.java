@@ -55,6 +55,13 @@ public class WxMpConfiguration {
         return service;
     }
 
+    /**
+     * 消息路由
+     * 扫码事件
+     * 关注事件
+     * @param wxMpService
+     * @return
+     */
     @Bean
     public WxMpMessageRouter messageRouter(WxMpService wxMpService) {
         final WxMpMessageRouter newRouter = new WxMpMessageRouter(wxMpService);
