@@ -56,7 +56,7 @@ public class WxMsgService {
             return null;
         }
 
-        //user为空先注册,手动生成,以保存uid
+        //user为空先注册,手动生成,以保存uid，注册
         if (Objects.isNull(user)) {
             user = User.builder().openId(openid).build();
             userService.register(user);

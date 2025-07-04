@@ -2,8 +2,10 @@ package com.d4c.www.user.service.adapter;
 
 import cn.hutool.core.bean.BeanUtil;
 
+import com.d4c.www.user.domain.entity.User;
 import com.d4c.www.websocket.domain.enums.WSRespTypeEnum;
 import com.d4c.www.websocket.domain.vo.resp.ws.WSBaseResp;
+import com.d4c.www.websocket.domain.vo.resp.ws.WSLoginSuccess;
 import com.d4c.www.websocket.domain.vo.resp.ws.WSLoginUrl;
 import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import org.springframework.beans.BeanUtils;
@@ -28,5 +30,24 @@ public class WSAdapter {
         return wsBaseResp;
     }
 
+    public static WSBaseResp<WSLoginSuccess> buildLoginSuccessResp(User user, String token, boolean hasPower) {
+        WSBaseResp<WSLoginSuccess> wsBaseResp = new WSBaseResp<>();
+        wsBaseResp.setType(WSRespTypeEnum.LOGIN_SUCCESS.getType());
+        WSLoginSuccess wsLoginSuccess = WSLoginSuccess.builder()
+                .avatar(user.getAvatar())
+                .name(user.getName())
+                .token(token)
+                .uid(user.getId())
+                .power(hasPower ? 1 : 0)
+                .build();
+        wsBaseResp.setData(wsLoginSuccess);
+        return wsBaseResp;
+    }
+
+    public static WSBaseResp<WSLoginSuccess> buildInvalidateTokenResp() {
+        WSBaseResp<WSLoginSuccess> wsBaseResp = new WSBaseResp<>();
+        wsBaseResp.setType(WSRespTypeEnum.INVALIDATE_TOKEN.getType());
+        return wsBaseResp;
+    }
 
 }

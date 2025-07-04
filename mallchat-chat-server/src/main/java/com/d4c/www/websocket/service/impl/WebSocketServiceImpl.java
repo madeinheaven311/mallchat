@@ -4,9 +4,14 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONUtil;
 import com.d4c.www.common.constant.RedisKey;
 import com.d4c.www.common.util.RedisUtils;
+import com.d4c.www.user.dao.UserDao;
 import com.d4c.www.user.domain.entity.User;
+import com.d4c.www.user.domain.enums.RoleEnum;
+import com.d4c.www.user.service.IRoleService;
+import com.d4c.www.user.service.LoginService;
 import com.d4c.www.user.service.adapter.WSAdapter;
 import com.d4c.www.websocket.domain.dto.WSChannelExtraDTO;
+import com.d4c.www.websocket.domain.vo.req.ws.WSAuthorize;
 import com.d4c.www.websocket.domain.vo.resp.ws.WSBaseResp;
 import com.d4c.www.websocket.service.WebSocketService;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -20,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,12 +52,19 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     private static final ConcurrentHashMap<Long, CopyOnWriteArrayList<Channel>> ONLINE_UID_MAP = new ConcurrentHashMap<>();
 
+
     public static ConcurrentHashMap<Channel, WSChannelExtraDTO> getOnlineMap() {
         return ONLINE_WS_MAP;
     }
     private static final String LOGIN_CODE = "loginCode";
     @Autowired
     private WxMpService wxMpService;
+    @Autowired
+    private UserDao userDao;
+    @Autowired
+    private LoginService loginService;
+    @Autowired
+    private IRoleService iRoleService;
     @Override
     public void connect(Channel channel) {
         ONLINE_WS_MAP.put(channel, new WSChannelExtraDTO());
@@ -124,4 +137,69 @@ public class WebSocketServiceImpl implements WebSocketService {
     private void sendMsg(Channel channel, WSBaseResp<?> wsBaseResp) {
         channel.writeAndFlush(new TextWebSocketFrame(JSONUtil.toJsonStr(wsBaseResp)));
     }
+
+    /**
+     * 扫码登录成功，需要将用户和连接进行处理
+     * @param loginCode
+     * @param uid
+     * @return
+     */
+    @Override
+    public Boolean scanLoginSuccess(Integer loginCode, Long uid) {
+        //确认连接在该机器
+        Channel channel = WAIT_LOGIN_MAP.getIfPresent(loginCode);
+        if (Objects.isNull(channel)) {
+            return Boolean.FALSE;
+        }
+        User user = userDao.getById(uid);
+        //移除code
+        WAIT_LOGIN_MAP.invalidate(loginCode);
+        //调用用户登录模块
+        String token = loginService.login(uid);
+//        //用户登录
+        loginSuccess(channel, user, token);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public void authorize(Channel channel, WSAuthorize wsAuthorize) {
+        //校验token
+        boolean verifySuccess = loginService.verify(wsAuthorize.getToken());
+        if (verifySuccess) {//用户校验成功给用户登录
+            User user = userDao.getById(loginService.getValidUid(wsAuthorize.getToken()));
+            loginSuccess(channel, user, wsAuthorize.getToken());
+        } else { //让前端的token失效
+            sendMsg(channel, WSAdapter.buildInvalidateTokenResp());
+        }
+    }
+
+    /**
+     * (channel必在本地)登录成功，并更新状态
+     */
+    private void loginSuccess(Channel channel, User user, String token) {
+        //更新上线列表
+        online(channel, user.getId());
+        //返回给用户登录成功
+        boolean hasPower = iRoleService.hasPower(user.getId(), RoleEnum.CHAT_MANAGER);
+        //发送给对应的用户
+        sendMsg(channel, WSAdapter.buildLoginSuccessResp(user, token, hasPower));
+        //发送用户上线事件
+        //boolean online = userCache.isOnline(user.getId());
+        if (1==1) {
+//            user.setLastOptTime(new Date());
+//            user.refreshIp(NettyUtil.getAttr(channel, NettyUtil.IP));
+//            applicationEventPublisher.publishEvent(new UserOnlineEvent(this, user));
+        }
+    }
+
+    /**
+     * 用户上线
+     */
+    private void online(Channel channel, Long uid) {
+//        getOrInitChannelExt(channel).setUid(uid);
+//        ONLINE_UID_MAP.putIfAbsent(uid, new CopyOnWriteArrayList<>());
+//        ONLINE_UID_MAP.get(uid).add(channel);
+//        NettyUtil.setAttr(channel, NettyUtil.UID, uid);
+    }
+
 }
