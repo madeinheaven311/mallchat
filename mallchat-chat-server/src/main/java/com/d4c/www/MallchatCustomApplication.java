@@ -13,6 +13,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 //@MapperScan({"com.d4c.www.**.mapper"})
 @ServletComponentScan
 @MapperScan({"com.d4c.www.**.mapper"})
+//feature
 public class MallchatCustomApplication {
 
     public static void main(String[] args) {
