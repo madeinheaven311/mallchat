@@ -15,6 +15,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @MapperScan({"com.d4c.www.**.mapper"})
 public class MallchatCustomApplication {
 
+    //master
     public static void main(String[] args) {
         SpringApplication.run(MallchatCustomApplication.class,args);
     }
