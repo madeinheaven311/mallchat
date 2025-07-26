@@ -16,6 +16,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 public class MallchatCustomApplication {
 
     //master
+    //feature
     public static void main(String[] args) {
         SpringApplication.run(MallchatCustomApplication.class,args);
     }
