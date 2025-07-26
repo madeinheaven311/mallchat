@@ -18,6 +18,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 //feature 11
 //feature 22
 //feature 33
+//feature 3
 public class MallchatCustomApplication {
 
     public static void main(String[] args) {
